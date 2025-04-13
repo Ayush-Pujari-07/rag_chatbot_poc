@@ -27,6 +27,11 @@ class Config:
     # OpenAI API Key
     OPENAI_API_KEY: SecretStr | None = SecretStr(os.environ.get("OPENAI_API_KEY", ""))
 
+    # Qdrant Config
+    QDRANT_COLLECTION_NAME: str = os.environ.get("QDRANT_COLLECTION_NAME", "chatbot")
+    QDRANT_API_KEY: str | None = os.environ.get("QDRANT_API_KEY", "")
+    QDRANT_URL: str = os.environ.get("QDRANT_URL", "localhost")
+
 
 settings = Config()
 
