@@ -1,17 +1,15 @@
-import logging
 import traceback
-from fastapi import APIRouter, Depends, Response, status, HTTPException
 
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from backend.auth.jwt import create_access_token
-from backend.auth.service import create_user, authenticate_user, create_refresh_token
-from backend.auth.utils import get_refresh_token_settings
 from backend.auth.dependencies import valid_user_create
+from backend.auth.jwt import create_access_token
 from backend.auth.schemas import AccessTokenResponse, AuthUser, UserResponse
+from backend.auth.service import authenticate_user, create_refresh_token, create_user
+from backend.auth.utils import get_refresh_token_settings
+from backend.logger import logger
 
 router = APIRouter()
-
-logger = logging.getLogger(__name__)
 
 
 @router.post("/users", status_code=status.HTTP_201_CREATED, response_model=UserResponse)

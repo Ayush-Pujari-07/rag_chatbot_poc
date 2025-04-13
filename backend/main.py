@@ -1,14 +1,16 @@
-import redis
 import signal
-from typing import AsyncGenerator
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator
+
+import redis
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 
-from backend.logger import logger
-from backend.config import app_configs, settings
 from backend.auth.router import router as auth_router
+from backend.chat.router import router as chat_router
+from backend.config import app_configs, settings
+from backend.logger import logger
 
 logger.info("Starting application")
 
@@ -94,6 +96,7 @@ async def healthcheck() -> dict[str, str]:
 
 # Include routers
 app.include_router(auth_router, tags=["Auth"])
+app.include_router(chat_router, tags=["Chat"])
 
 if __name__ == "__main__":
     import uvicorn

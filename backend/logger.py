@@ -1,8 +1,8 @@
-import os
 import logging
-
+import os
 from contextlib import suppress  # type: ignore
 from datetime import datetime, timedelta  # type: ignore
+
 # from botocore.exceptions import ClientError
 
 with suppress(ImportError):

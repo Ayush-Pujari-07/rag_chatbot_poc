@@ -1,4 +1,5 @@
 from jose import jwt
+
 from backend.auth.config import auth_config
 
 

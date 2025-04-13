@@ -1,6 +1,8 @@
 import os
 from typing import Any
 
+from pydantic import SecretStr
+
 
 class Config:
     # Development-specific settings
@@ -23,7 +25,7 @@ class Config:
     CORS_HEADERS: list[str] = ["*"]
 
     # OpenAI API Key
-    OPENAI_API_KEY: str | None = os.environ.get("OPENAI_API_KEY")
+    OPENAI_API_KEY: SecretStr | None = SecretStr(os.environ.get("OPENAI_API_KEY", ""))
 
 
 settings = Config()

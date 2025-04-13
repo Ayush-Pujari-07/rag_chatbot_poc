@@ -1,7 +1,8 @@
 import re
 from typing import Optional
+
+from pydantic import AfterValidator, BaseModel, EmailStr, Field, field_validator
 from typing_extensions import Annotated
-from pydantic import EmailStr, Field, field_validator, BaseModel, AfterValidator
 
 # Updated regex to include at least one uppercase letter
 STRONG_PASSWORD_PATTERN = re.compile(
@@ -44,3 +45,8 @@ class RefreshTokenSettings(BaseModel):
     domain: str
     value: Optional[str] = None
     max_age: Optional[int] = None
+
+
+class ValidateRefreshTokenResponse(BaseModel):
+    _id: str
+    user_id: str

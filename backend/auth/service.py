@@ -1,17 +1,16 @@
-import logging
-from backend.db import get_db
+from typing import Any, Dict, Optional
+
 from fastapi import HTTPException
 
-from backend.auth.schemas import AuthUser
-from backend.auth.security import hash_password, check_password
 from backend.auth.exceptions import InvalidCredentials
-from backend.auth.utils import generate_random_alphanum, calculate_refresh_token_expiry
-from typing import Dict, Any, Optional
-from backend.config import settings
+from backend.auth.schemas import AuthUser
+from backend.auth.security import check_password, hash_password
+from backend.auth.utils import calculate_refresh_token_expiry, generate_random_alphanum
+from backend.db import get_db
+from backend.logger import logger
 
 # Initialize the database connection and logger
-db = get_db(settings.PROJECT_NAME)
-logger = logging.getLogger(__name__)
+db = get_db()
 
 
 async def create_user(user_data: AuthUser) -> Dict[str, Any]:
@@ -21,7 +20,6 @@ async def create_user(user_data: AuthUser) -> Dict[str, Any]:
             "name": user_data.name,
             "email": user_data.email.lower(),
             "password": hashed_password,
-            "pdf_data": "",
         }
 
         # Check if user already exists
@@ -70,3 +68,7 @@ async def create_refresh_token(
 
 async def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
     return await db["users"].find_one({"email": email.lower()})
+
+
+async def get_refresh_token(refresh_token: str) -> Optional[Dict[str, Any]]:
+    return await db["refresh_tokens"].find_one({"refresh_token": refresh_token})

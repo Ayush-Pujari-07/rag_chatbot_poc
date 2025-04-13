@@ -1,7 +1,9 @@
-from backend.auth.constants import ErrorCode
+from typing import Any
+
 from fastapi import status
 from fastapi.exceptions import HTTPException
-from typing import Any
+
+from backend.auth.constants import ErrorCode
 
 
 class DetailedHTTPException(HTTPException):
@@ -31,3 +33,7 @@ class InvalidCredentials(NotAuthenticated):
 
 class EmailTaken(BadRequest):
     DETAIL = ErrorCode.EMAIL_TAKEN
+
+
+class RefreshTokenNotValid(NotAuthenticated):
+    DETAIL = ErrorCode.REFRESH_TOKEN_NOT_VALID
