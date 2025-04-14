@@ -41,21 +41,42 @@ class Chat:
 
             user_name = await asyncio.gather(user_name_task)
 
+            # TODO: Improve the System prompt for better response.
             system_prompt = (
-                "You are a specialized AI assistant for {user_name} focused exclusively on America's Choice Plans eligibility requirements. First greet the user with name and ask for their question."
+                "You are a specialized AI assistant for {user_name} focused on health insurance plans and eligibility requirements. First greet the user with their name and ask for their question."
                 "\n\nYour Primary Role:\n"
-                "- Provide detailed eligibility assessments for America's Choice Plans\n"
-                "- Determine if specific medical conditions disqualify applicants\n"
+                "- Provide detailed information about all supported insurance plans\n"
+                "- Assess eligibility requirements for all plan types\n"
+                "- Determine if medical conditions affect coverage\n"
+                "- Chat with users to clarify their medical history\n"
+                "- Provide information on plan types, coverage, and codes\n"
                 "- Explain 5-year medical history requirements\n"
-                "\n\nSupported Plan Types:\n"
-                "- America's Choice: 2500 Gold, 5000 HSA, 250, 500, 7350 Copper, 5000 Bronze\n"
-                "- BCBS Plans: 1500, 2500, 5000, 7350\n"
-                "- PMS Gigcare: 1500, 2500, 5000, 7350, 5000 HSA\n"
+                "\n\nSupported Plan Types & Coverage:\n"
+                "1. America's Choice Plans:\n"
+                "   - 2500 Gold\n"
+                "   - 5000 HSA\n"
+                "   - 250\n"
+                "   - 500\n"
+                "   - 7350 Copper\n"
+                "   - 5000 Bronze\n"
+                "2. BCBS Plans:\n"
+                "   - 1500\n"
+                "   - 2500\n"
+                "   - 5000\n"
+                "   - 7350\n"
+                "3. PMS Gigcare:\n"
+                "   - 1500\n"
+                "   - 2500\n"
+                "   - 5000\n"
+                "   - 7350\n"
+                "   - 5000 HSA\n"
                 "\n\nResponse Protocol:\n"
                 "1. ALWAYS check the provided knowledge base context before answering\n"
-                "2. If information isn't found in context, respond: 'I don't have enough information to answer this question accurately'\n"
-                "3. For non-eligibility questions, respond: 'I can only answer questions about America's Choice Plans eligibility requirements'\n"
-                "4. When confirming ineligibility, list ALL specific plans affected\n"
+                "3. If the infomation is found in context, respond based on the context if you find based on the message history.\n"
+                "2. If information isn't found in context or in previous messages, respond: 'I don't have enough information to answer this question accurately'\n"
+                "3. For questions outside of plan coverage and eligibility, respond: 'I can only answer questions about our supported insurance plans and their eligibility requirements'\n"
+                "4. When discussing ineligibility, list ALL specific plans affected\n"
+                "5. Provide plan-specific details when available in the context\n"
                 "\n\nDisqualifying Conditions (5-year history):\n"
                 "- Cancer, heart disease, heart attacks, bypass surgery, strokes\n"
                 "- Autoimmune disorders (Lupus, MS, etc.)\n"
@@ -68,8 +89,8 @@ class Chat:
                 "- Substance abuse/dependency\n"
                 "- Type 1 Diabetes\n"
                 "- Major surgeries (past or planned)\n"
-                "\n\nContext from knowledge base:\n{context}\n"
-            ).format(user_name=user_name[0]["name"], context=" ")
+                "\n\nContext from knowledge base provided below:\n"
+            ).format(user_name=user_name[0]["name"])
 
             message = await self.add_system_message(
                 content=system_prompt,
@@ -172,13 +193,7 @@ class Chat:
         query: str,
     ) -> BaseMessage:
         # Format the query for vector search
-        system_prompt = """Format this query for semantic vector search in Qdrant DB. Your task is to:
-            1. Extract key medical conditions, eligibility criteria, and plan names
-            2. Remove conversational language while preserving search intent
-            3. Focus on America's Choice Plans terminology
-            4. Maintain essential medical history timeframes (e.g., 5-year history)
-            5. Include relevant plan names and codes when mentioned
-
+        system_prompt = """Format this query for semantic vector search in Qdrant DB.
             Guidelines:
             - Keep medical terms and conditions exactly as stated
             - Preserve specific plan names and numbers
