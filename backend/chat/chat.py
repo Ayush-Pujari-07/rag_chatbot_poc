@@ -5,11 +5,13 @@ from typing import List, Union
 
 from bson.objectid import ObjectId
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.messages.base import BaseMessage
 from langchain_openai.chat_models import ChatOpenAI
 
 from backend.chat.schemas import AllChatMessage, ChatMessage, ChatMessageOut, ChatRole
 from backend.config import settings
 from backend.logger import logger
+from backend.vector_db.qdrant import QdrantUtils
 
 GPT4 = "gpt-4o-mini"
 
@@ -18,6 +20,9 @@ class Chat:
     def __init__(self, user_id: str, db):
         self.db = db
         self.user_id = ObjectId(user_id)
+        self.qdrant_client = QdrantUtils(
+            url=settings.QDRANT_URL, api_key=settings.QDRANT_API_KEY
+        )
         self.messages: List[ChatMessage] = []
         self.chat_model = ChatOpenAI(api_key=settings.OPENAI_API_KEY, model=GPT4)
 
@@ -37,8 +42,34 @@ class Chat:
             user_name = await asyncio.gather(user_name_task)
 
             system_prompt = (
-                "You are a conversational AI assistant for Personal Assistance. You are designed to help user {user_name} with their goals. "
-            ).format(user_name=user_name[0]["name"])
+                "You are a specialized AI assistant for {user_name} focused exclusively on America's Choice Plans eligibility requirements. First greet the user with name and ask for their question."
+                "\n\nYour Primary Role:\n"
+                "- Provide detailed eligibility assessments for America's Choice Plans\n"
+                "- Determine if specific medical conditions disqualify applicants\n"
+                "- Explain 5-year medical history requirements\n"
+                "\n\nSupported Plan Types:\n"
+                "- America's Choice: 2500 Gold, 5000 HSA, 250, 500, 7350 Copper, 5000 Bronze\n"
+                "- BCBS Plans: 1500, 2500, 5000, 7350\n"
+                "- PMS Gigcare: 1500, 2500, 5000, 7350, 5000 HSA\n"
+                "\n\nResponse Protocol:\n"
+                "1. ALWAYS check the provided knowledge base context before answering\n"
+                "2. If information isn't found in context, respond: 'I don't have enough information to answer this question accurately'\n"
+                "3. For non-eligibility questions, respond: 'I can only answer questions about America's Choice Plans eligibility requirements'\n"
+                "4. When confirming ineligibility, list ALL specific plans affected\n"
+                "\n\nDisqualifying Conditions (5-year history):\n"
+                "- Cancer, heart disease, heart attacks, bypass surgery, strokes\n"
+                "- Autoimmune disorders (Lupus, MS, etc.)\n"
+                "- Blood disorders (Anemia, AIDS, HIV, Hemophilia)\n"
+                "- Organ failure/transplants/dialysis\n"
+                "- Current pregnancy\n"
+                "- Hospitalization history\n"
+                "- Respiratory disorders (Emphysema, COPD)\n"
+                "- Musculoskeletal disorders\n"
+                "- Substance abuse/dependency\n"
+                "- Type 1 Diabetes\n"
+                "- Major surgeries (past or planned)\n"
+                "\n\nContext from knowledge base:\n{context}\n"
+            ).format(user_name=user_name[0]["name"], context=" ")
 
             message = await self.add_system_message(
                 content=system_prompt,
@@ -136,14 +167,87 @@ class Chat:
                 message_history.append(SystemMessage(content=message["content"]))
         return message_history
 
+    async def format_query_for_vector_search(
+        self,
+        query: str,
+    ) -> BaseMessage:
+        # Format the query for vector search
+        system_prompt = """Format this query for semantic vector search in Qdrant DB. Your task is to:
+            1. Extract key medical conditions, eligibility criteria, and plan names
+            2. Remove conversational language while preserving search intent
+            3. Focus on America's Choice Plans terminology
+            4. Maintain essential medical history timeframes (e.g., 5-year history)
+            5. Include relevant plan names and codes when mentioned
+
+            Guidelines:
+            - Keep medical terms and conditions exactly as stated
+            - Preserve specific plan names and numbers
+            - Remove filler words and conversational phrases
+            - Maintain temporal conditions (e.g., "current", "past 5 years")
+            - Do not add information not present in original query
+            - Format should be clear and concise for vector similarity search
+
+            Example:
+            Input: "Can someone with a history of heart disease in the last 3 years get America's Choice 2500 Gold plan?"
+            Output: "heart disease medical history 3 years eligibility America's Choice 2500 Gold plan"
+        """
+        return await self.chat_model.ainvoke(
+            [SystemMessage(content=system_prompt), HumanMessage(content=query)],
+        )
+
     async def task_chat(
         self,
         user_message: str,
     ) -> ChatMessageOut:
         try:
+            # Add user message and get conversation history
             await self.add_user_message(content=user_message)
             message_history = await self.get_message_history()
 
+            # Format query and perform vector search
+            formatted_query = await self.format_query_for_vector_search(user_message)
+            documents = await self.qdrant_client.search_documents(
+                collection_name=settings.QDRANT_COLLECTION_NAME,
+                query=str(formatted_query.content),
+            )
+
+            # Process retrieved documents
+            if not documents:
+                logger.warning(
+                    f"No relevant documents found for query: {formatted_query.content}"
+                )
+
+            context = []
+            for idx, doc in enumerate(documents):
+                if not doc.payload:
+                    continue
+                context.append(
+                    f"[{idx + 1}] title: {doc.payload.get('title', 'No title')} "
+                    f"content: {doc.payload.get('excerpt', 'No content')}"
+                )
+
+            # Update system message with new context
+            if context:
+                system_message = next(
+                    (msg for msg in message_history if isinstance(msg, SystemMessage)),
+                    None,
+                )
+                if system_message:
+                    updated_content = (
+                        str(system_message.content) + "\n".join(context) + "\n"
+                    )
+                    message_history[0] = SystemMessage(content=updated_content)
+
+            # Log relevant information for debugging
+            logger.info({
+                "user_message": user_message,
+                "formatted_query": formatted_query.content,
+                "context_count": len(context),
+                "message_history_length": len(message_history),
+                "message_history": message_history,
+            })
+
+            # Generate and process completion
             message = await self.process_completion(message_history)
 
             return ChatMessageOut(
@@ -154,8 +258,8 @@ class Chat:
                 updated_at=message["updated_at"],
             )
 
-        except Exception:
-            logger.error(f"Error: {traceback.format_exc()}")
+        except Exception as e:
+            logger.error(f"Error in task_chat: {str(e)}\n{traceback.format_exc()}")
             raise
 
     async def process_completion(self, message_history):

@@ -345,7 +345,7 @@ def home_page():
             """)
         with col2:
             st.image(
-                "https://www.svgrepo.com/show/384674/ai-artificial-intelligence-bot-brain-machine.svg",
+                "https://www.svgrepo.com/show/530200/whale.svg",
                 width=150,
             )
 
