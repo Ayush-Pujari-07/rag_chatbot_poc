@@ -169,7 +169,7 @@ class QdrantUtils:
                 ],
                 query=models.FusionQuery(fusion=models.Fusion.DBSF),
                 search_params=models.SearchParams(exact=True, hnsw_ef=128),
-                score_threshold=0.7,
+                score_threshold=0.5,
             )
             return response.points
         except Exception as e:

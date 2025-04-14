@@ -189,7 +189,7 @@ def load_chat_messages(refresh_token):
 def sidebar_menu():
     with st.sidebar:
         st.image(
-            "https://www.svgrepo.com/show/384674/ai-artificial-intelligence-bot-brain-machine.svg",
+            "https://www.svgrepo.com/show/530200/whale.svg",
             width=100,
         )
         colored_header(
