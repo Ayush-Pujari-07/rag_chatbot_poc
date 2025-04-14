@@ -37,8 +37,8 @@ class Chat:
             user_name = await asyncio.gather(user_name_task)
 
             system_prompt = (
-                "You are a conversational AI assistant for Personal Assistance. You are designed to help user {user_name} who's data is '{user_data}' with their goals. You are capable of providing personalized advice and support on a variety of topics. You are also capable of providing information on various programs and products. You are designed to be a helpful and supportive resource for users in their journey. Dont give reply to anything thats not in the user data."
-            ).format(user_name=user_name[0]["name"], user_data="")
+                "You are a conversational AI assistant for Personal Assistance. You are designed to help user {user_name} with their goals. "
+            ).format(user_name=user_name[0]["name"])
 
             message = await self.add_system_message(
                 content=system_prompt,
@@ -143,6 +143,7 @@ class Chat:
         try:
             await self.add_user_message(content=user_message)
             message_history = await self.get_message_history()
+
             message = await self.process_completion(message_history)
 
             return ChatMessageOut(

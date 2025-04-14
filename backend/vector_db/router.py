@@ -68,7 +68,7 @@ async def delete_collection(
 @router.post("/document/upload")
 async def upload_document(
     collection_name: str = Body(default=settings.QDRANT_COLLECTION_NAME),
-    document_type: DocumentTypes = Body(...),
+    document_type: DocumentTypes = Body(default=DocumentTypes.PROJECT_DOCUMENT),
     file: UploadFile = File(...),
     user: ValidateRefreshTokenResponse = Depends(valid_refresh_token),
 ) -> JSONResponse:
