@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from qdrant_client import models
 
 
-class DocumentTypes(Enum, str):
+class DocumentTypes(str, Enum):
     REPOSITORY_DOCUMENT = "Repository Document"
     PROJECT_DOCUMENT = "Project Document"
 
@@ -14,7 +14,7 @@ class UserId(BaseModel):
     user_id: str
 
 
-class DocumentProcessingStatus(Enum):
+class DocumentProcessingStatus(str, Enum):
     PENDING = "Pending"
     PROCESSING = "Processing"
     DONE = "Done"

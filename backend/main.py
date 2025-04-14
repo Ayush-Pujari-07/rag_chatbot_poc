@@ -11,6 +11,7 @@ from backend.auth.router import router as auth_router
 from backend.chat.router import router as chat_router
 from backend.config import app_configs, settings
 from backend.logger import logger
+from backend.vector_db.router import router as vector_db_router
 
 logger.info("Starting application")
 
@@ -97,6 +98,7 @@ async def healthcheck() -> dict[str, str]:
 # Include routers
 app.include_router(auth_router, tags=["Auth"])
 app.include_router(chat_router, tags=["Chat"])
+app.include_router(vector_db_router, tags=["Vector DB"])
 
 if __name__ == "__main__":
     import uvicorn

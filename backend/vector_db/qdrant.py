@@ -1,9 +1,10 @@
-import io
+import os
+import traceback
 import uuid
-from datetime import datetime, timezone
 from typing import Any
 
-import pdfplumber
+import pymupdf
+import pymupdf4llm
 from openai import AsyncOpenAI
 from qdrant_client import AsyncQdrantClient, models
 from scipy.sparse._matrix import spmatrix
@@ -11,35 +12,20 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 from backend.config import settings
 from backend.logger import logger
-from backend.vector_db.schemas import Document, DocumentTypes, UserId
-from backend.vector_db.service import RecursiveCharacterTextSplitter
+from backend.vector_db.schemas import Document, UserId
 
 
 class RagError(Exception):
     """Base exception for RAG operations"""
 
 
-class BaseUtils:
-    retrieval_method = "BASE CLASS"
-
-    async def fetch_raw_responses(
-        self, query: str, k: int = 5, query_filter: Any | None = None
-    ):
-        raise NotImplementedError("This method should be implemented by subclasses.")
-
-    @staticmethod
-    def process_raw_response(doc: Any):
-        raise NotImplementedError("This method should be implemented by subclasses.")
-
-
 # TODO: Add functionality for updating the existing collection
-class QdrantUtils(BaseUtils):
+class QdrantUtils:
     def __init__(self, url, api_key):
-        self.retrieval_method = "QDRANT"
         self.url = url
         self.api_key = api_key
         self.qdrant_client = AsyncQdrantClient(url=url, api_key=api_key)
-        self.openai_client = AsyncOpenAI(api_key=str(settings.OPENAI_API_KEY))
+        self.openai_client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
     async def delete_collection(self, collection_name: str) -> bool:
         try:
@@ -84,83 +70,8 @@ class QdrantUtils(BaseUtils):
                 )
                 return True
             return False
-        except Exception as e:
-            logger.error(f"Error creating collection: {e}")
-            return False
-
-    async def update_repository_doc_metadata(
-        self,
-        repository_update_request: dict[str, Any],
-        user_id: UserId,
-        collection_name: str = settings.QDRANT_COLLECTION_NAME,
-    ) -> bool:
-        try:
-            qdrant_res = await self.qdrant_client.scroll(
-                collection_name=f"{collection_name}",
-                scroll_filter=models.Filter(
-                    must=[
-                        models.FieldCondition(
-                            key="metadata.document_id",
-                            match=models.MatchValue(
-                                value=str(repository_update_request["document_id"])
-                            ),
-                        ),
-                        models.FieldCondition(
-                            key="metadata.user_id",
-                            match=models.MatchValue(value=user_id.user_id),
-                        ),
-                        models.FieldCondition(
-                            key="metadata.document_type",
-                            match=models.MatchValue(
-                                value=DocumentTypes.REPOSITORY_DOCUMENT.value
-                            ),
-                        ),
-                    ]
-                ),
-                with_payload=True,
-                with_vectors=False,
-            )
-            # TODO: Need to check a better way to update metadata
-            existing_metadata_to_be_updated = qdrant_res[0][0].payload["metadata"]  # type: ignore
-            existing_metadata_to_be_updated.update({
-                "title": repository_update_request["metadata"].get("title", ""),
-                "location": repository_update_request["metadata"].get("location", ""),
-                "type": repository_update_request["metadata"].get("type", ""),
-                "activity": repository_update_request["metadata"].get("activity", ""),
-                "sub_activity": repository_update_request["metadata"].get(
-                    "sub_activity", ""
-                ),
-                "uploader_name": repository_update_request["uploader_name"],
-                "uploader_id": str(repository_update_request["uploader_id"]),
-                "updated_at": datetime.now(tz=timezone.utc).isoformat(),
-            })
-            await self.qdrant_client.set_payload(
-                collection_name=f"{collection_name}",
-                points=models.Filter(
-                    must=[
-                        models.FieldCondition(
-                            key="metadata.document_id",
-                            match=models.MatchValue(
-                                value=str(repository_update_request["document_id"])
-                            ),
-                        ),
-                        models.FieldCondition(
-                            key="metadata.user_id",
-                            match=models.MatchValue(value=user_id.user_id),
-                        ),
-                        models.FieldCondition(
-                            key="metadata.document_type",
-                            match=models.MatchValue(
-                                value=DocumentTypes.REPOSITORY_DOCUMENT.value
-                            ),
-                        ),
-                    ]
-                ),
-                payload={"metadata": existing_metadata_to_be_updated},
-            )
-            return True
-        except Exception as e:
-            logger.error(f"Error updating metadata in qdrant: {e}")
+        except Exception:
+            logger.error(f"Error creating collection: {traceback.format_exc()}")
             return False
 
     async def add_document_to_collection(
@@ -206,29 +117,26 @@ class QdrantUtils(BaseUtils):
         filename: str,
         file_content: bytes,
         metadata: dict,
-        chunk_size: int = 1000,
-        chunk_overlap: int = 200,
-        separators: list[str] = ["\n"],
     ):
-        buf = io.BytesIO(file_content)
+        print(f"File name: {filename}")
+        print(f"Metadata: {metadata}")
+
+        # Open the PDF document from the byte stream
+        doc = pymupdf.open(stream=file_content, filetype="pdf")
 
         # Process the PDF
-        pdf_data = pdfplumber.open(buf)
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=chunk_size, chunk_overlap=chunk_overlap, separators=separators
-        )
+        pdf_data = pymupdf4llm.to_markdown(doc, page_chunks=True, extract_words=True)
         documents = []
-        for page in pdf_data.pages:
-            page_text = page.extract_text()
-            chunks = text_splitter.split_text(page_text)
-            for chunk in chunks:
-                documents.append({
-                    "source": filename,
-                    "title": filename,
-                    "excerpt": chunk,
-                    "excerpt_page_number": page.page_number,
-                    "metadata": metadata,
-                })
+        for page in pdf_data:
+            documents.append({
+                "source": filename,
+                "title": filename,
+                "excerpt": " ".join([word[4] for word in page["words"]]),  # type: ignore
+                "excerpt_page_number": page["metadata"]["page"],  # type: ignore
+                "metadata": metadata,
+            })
+        print(f"Documents: {documents}")
+
         final_data = await self.create_point(documents)
 
         if not await self.qdrant_client.collection_exists(collection_name):
@@ -240,12 +148,12 @@ class QdrantUtils(BaseUtils):
             )
         logger.info(f"File {filename} uploaded.")
 
+    # TODO: Check with adding diffrent filters
     async def search_documents(
         self,
         collection_name: str,
         query: str,
         k: int = 5,
-        query_filter: models.Filter | None = None,
     ) -> list[models.ScoredPoint]:
         try:
             response = await self.qdrant_client.query_points(
@@ -263,7 +171,7 @@ class QdrantUtils(BaseUtils):
                     ),
                 ],
                 query=models.FusionQuery(fusion=models.Fusion.DBSF),
-                query_filter=query_filter,
+                search_params=models.SearchParams(exact=True, hnsw_ef=128),
                 score_threshold=0.7,
             )
             return response.points
@@ -298,7 +206,7 @@ class QdrantUtils(BaseUtils):
     async def create_embedding(self, query: str) -> list[float]:
         try:
             embedding = await self.openai_client.embeddings.create(
-                input=query, model="text-embedding-3-small"
+                input=query, model="text-embedding-3-small", dimensions=1536
             )
             return embedding.data[0].embedding
         except Exception as e:

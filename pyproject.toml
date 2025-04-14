@@ -22,6 +22,7 @@ dependencies = [
     "python-jose",
     "pydantic[email]",
     "pydantic-settings",
+    "pymupdf4llm",
     "pyjwt",
     "python-dotenv",
     "python-multipart",
