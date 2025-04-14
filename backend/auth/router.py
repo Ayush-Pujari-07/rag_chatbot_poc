@@ -2,12 +2,12 @@ import traceback
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from backend.auth.dependencies import valid_user_create
-from backend.auth.jwt import create_access_token
-from backend.auth.schemas import AccessTokenResponse, AuthUser, UserResponse
-from backend.auth.service import authenticate_user, create_refresh_token, create_user
-from backend.auth.utils import get_refresh_token_settings
-from backend.logger import logger
+from auth.dependencies import valid_user_create
+from auth.jwt import create_access_token
+from auth.schemas import AccessTokenResponse, AuthUser, UserResponse
+from auth.service import authenticate_user, create_refresh_token, create_user
+from auth.utils import get_refresh_token_settings
+from logger import logger
 
 router = APIRouter()
 

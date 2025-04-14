@@ -1,6 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from backend.config import settings
+from config import settings
 
 client = AsyncIOMotorClient(settings.MONGODB_URI)
 db = client[settings.PROJECT_NAME]

@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 
-from backend.auth.dependencies import valid_refresh_token
-from backend.auth.schemas import ValidateRefreshTokenResponse
-from backend.config import settings
-from backend.logger import logger
-from backend.vector_db.qdrant import QdrantUtils
-from backend.vector_db.schemas import DocumentTypes, UserId
+from auth.dependencies import valid_refresh_token
+from auth.schemas import ValidateRefreshTokenResponse
+from config import settings
+from logger import logger
+from vector_db.qdrant import QdrantUtils
+from vector_db.schemas import DocumentTypes, UserId
 
 router = APIRouter()
 qdrant_client = QdrantUtils(url=settings.QDRANT_URL, api_key=settings.QDRANT_API_KEY)

@@ -11,7 +11,7 @@ class Config:
 
     APP_VERSION: str = "0.1.0"
     PROJECT_NAME: str = "RAG_ChatBot_PoC"
-    SITE_DOMAIN: str = "localhost"
+    SITE_DOMAIN: str = "0.0.0.0"
 
     # MongoDB URI
     MONGODB_URI: str | None = os.environ.get("MONGODB_URI")

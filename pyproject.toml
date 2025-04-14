@@ -16,7 +16,6 @@ dependencies = [
     "langchain",
     "langchain_openai",
     "motor",
-    "pdfplumber",
     "pre-commit",
     "pydantic",
     "python-jose",
@@ -51,6 +50,7 @@ test = [
 [tool.pytest.ini_options]
 pythonpath = [
     "backend",
+    "frontend"
 ]
 
 [tool.ruff]

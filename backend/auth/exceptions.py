@@ -3,7 +3,7 @@ from typing import Any
 from fastapi import status
 from fastapi.exceptions import HTTPException
 
-from backend.auth.constants import ErrorCode
+from auth.constants import ErrorCode
 
 
 class DetailedHTTPException(HTTPException):

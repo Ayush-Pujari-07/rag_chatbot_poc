@@ -6,9 +6,9 @@ from streamlit_extras.add_vertical_space import add_vertical_space
 from streamlit_extras.colored_header import colored_header
 
 # Constants for API endpoints
-AUTH_API_URL = "http://localhost:8000/auth"
-VECTOR_DB_API_URL = "http://localhost:8000/qdrant"
-CHAT_API_URL = "http://localhost:8000/chatbot"
+AUTH_API_URL = "http://backend:8000/auth"
+VECTOR_DB_API_URL = "http://backend:8000/qdrant"
+CHAT_API_URL = "http://backend:8000/chatbot"
 
 # Set page configuration
 st.set_page_config(

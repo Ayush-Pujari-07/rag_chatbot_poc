@@ -2,12 +2,12 @@ from typing import Any, Dict, Optional
 
 from fastapi import HTTPException
 
-from backend.auth.exceptions import InvalidCredentials
-from backend.auth.schemas import AuthUser
-from backend.auth.security import check_password, hash_password
-from backend.auth.utils import calculate_refresh_token_expiry, generate_random_alphanum
-from backend.db import get_db
-from backend.logger import logger
+from auth.exceptions import InvalidCredentials
+from auth.schemas import AuthUser
+from auth.security import check_password, hash_password
+from auth.utils import calculate_refresh_token_expiry, generate_random_alphanum
+from db import get_db
+from logger import logger
 
 # Initialize the database connection and logger
 db = get_db()

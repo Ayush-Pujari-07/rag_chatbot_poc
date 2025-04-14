@@ -3,9 +3,9 @@ from typing import Any
 
 from fastapi import Cookie
 
-from backend.auth.exceptions import EmailTaken, RefreshTokenNotValid
-from backend.auth.schemas import AuthUser, ValidateRefreshTokenResponse
-from backend.auth.service import get_refresh_token, get_user_by_email
+from auth.exceptions import EmailTaken, RefreshTokenNotValid
+from auth.schemas import AuthUser, ValidateRefreshTokenResponse
+from auth.service import get_refresh_token, get_user_by_email
 
 
 async def valid_user_create(

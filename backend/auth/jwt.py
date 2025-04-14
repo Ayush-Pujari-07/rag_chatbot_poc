@@ -1,6 +1,6 @@
 from jose import jwt
 
-from backend.auth.config import auth_config
+from auth.config import auth_config
 
 
 def create_access_token(

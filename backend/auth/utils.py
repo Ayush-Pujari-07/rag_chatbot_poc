@@ -2,9 +2,9 @@ import random
 import string
 from datetime import datetime, timedelta
 
-from backend.auth.config import auth_config
-from backend.auth.schemas import RefreshTokenSettings
-from backend.config import settings
+from auth.config import auth_config
+from auth.schemas import RefreshTokenSettings
+from config import settings
 
 ALPHA_NUM = string.ascii_letters + string.digits
 

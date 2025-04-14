@@ -7,11 +7,11 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 
-from backend.auth.router import router as auth_router
-from backend.chat.router import router as chat_router
-from backend.config import app_configs, settings
-from backend.logger import logger
-from backend.vector_db.router import router as vector_db_router
+from auth.router import router as auth_router
+from chat.router import router as chat_router
+from config import app_configs, settings
+from logger import logger
+from vector_db.router import router as vector_db_router
 
 logger.info("Starting application")
 
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     import uvicorn
 
     config = uvicorn.Config(
-        "backend.main:app",
+        "main:app",
         host=settings.SITE_DOMAIN,
         port=8000,
         log_level="info",

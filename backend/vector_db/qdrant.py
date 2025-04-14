@@ -10,9 +10,9 @@ from qdrant_client import AsyncQdrantClient, models
 from scipy.sparse._matrix import spmatrix
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from backend.config import settings
-from backend.logger import logger
-from backend.vector_db.schemas import Document, UserId
+from config import settings
+from logger import logger
+from vector_db.schemas import Document, UserId
 
 
 class RagError(Exception):

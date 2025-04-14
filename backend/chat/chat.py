@@ -8,10 +8,10 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.messages.base import BaseMessage
 from langchain_openai.chat_models import ChatOpenAI
 
-from backend.chat.schemas import AllChatMessage, ChatMessage, ChatMessageOut, ChatRole
-from backend.config import settings
-from backend.logger import logger
-from backend.vector_db.qdrant import QdrantUtils
+from chat.schemas import AllChatMessage, ChatMessage, ChatMessageOut, ChatRole
+from config import settings
+from logger import logger
+from vector_db.qdrant import QdrantUtils
 
 GPT4 = "gpt-4o"
 
