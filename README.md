@@ -1,6 +1,6 @@
-# RAG Chatbot PoC
+# RAG Chatbot POC
 
-This project is a **Proof of Concept (PoC)** for a chatbot application that leverages **FastAPI**, **MongoDB**, **Redis**, and **Qdrant** to create a document-aware conversational assistant. The chatbot uses **retrieval-augmented generation (RAG)** to answer user queries based on uploaded documents.
+This project is a Proof of Concept (POC) for a Retrieval-Augmented Generation (RAG) chatbot. The chatbot leverages retrieval techniques to enhance responses with relevant context from a knowledge base.
 
 ## Features
 
@@ -12,7 +12,7 @@ This project is a **Proof of Concept (PoC)** for a chatbot application that leve
 
 ## Prerequisites
 
-- **Python**: Version 3.10 or higher.
+- **Python**: Version 3.12 or higher.
 - **MongoDB**: For storing user and chat data.
 - **Redis**: For caching and session management.
 - **Qdrant**: For vector database operations.
@@ -32,6 +32,39 @@ The project is structured into the following components:
 - **AI Integration**:
   - **OpenAI API**: Generates embeddings for vector search and powers the chatbot's responses.
 
+## Project Flow
+
+1. **User Query**: The user submits a question via the Streamlit chatbot interface.
+2. **Authentication**: The backend validates the user's session using refresh token authentication.
+3. **Document Upload**: Users upload PDF documents via the frontend, which are processed and stored in the Qdrant vector database.
+4. **Retrieval**: The backend retrieves relevant documents or context from the Qdrant vector database using hybrid search (dense and sparse vectors).
+5. **Augmentation**: The retrieved context is combined with the user's query to provide additional information for the AI model.
+6. **Generation**: The combined input is sent to OpenAI's LLM (Large Language Model) to generate a response.
+7. **Response**: The chatbot returns the generated answer to the user, which is displayed in the Streamlit interface.
+
+## Code Structure
+
+```
+rag_chatbot_poc/
+├── backend/
+│   ├── auth/               # Authentication and user management
+│   ├── chat/               # Chatbot logic and schemas
+│   ├── config.py           # Application configuration
+│   ├── db/                 # MongoDB connection setup
+│   ├── logger.py           # Logging configuration
+│   ├── main.py             # FastAPI application entry point
+│   ├── vector_db/          # Qdrant integration and vector search
+│   ├── requirements.txt    # Backend dependencies
+├── frontend/
+│   ├── app.py              # Streamlit frontend
+│   ├── requirements.txt    # Frontend dependencies
+│   ├── Dockerfile          # Dockerfile for frontend
+├── docker-compose.yaml     # Docker Compose configuration
+├── pyproject.toml          # Project dependencies and configuration
+├── .env.example            # Example environment variables
+├── README.md               # Project documentation
+```
+
 ## Installation
 
 1. **Clone the Repository**:
@@ -47,10 +80,14 @@ The project is structured into the following components:
    ```
 
 3. **Install Dependencies**:
-   ```bash
-   pip install uv
-   uv pip install -e .
-   ```
+   - Backend:
+     ```bash
+     pip install -r backend/requirements.txt
+     ```
+   - Frontend:
+     ```bash
+     pip install -r frontend/requirements.txt
+     ```
 
 4. **Configure Environment Variables**:
    - Copy the example `.env` file:
@@ -59,21 +96,33 @@ The project is structured into the following components:
      ```
    - Update `.env` with your MongoDB URI, Redis host, Qdrant settings, and OpenAI API key.
 
-## Running the Application
+## Running the Application Locally
 
-1. **Start the Backend**:
+1. **Start the Backend Server**:
    ```bash
-   python -m backend.main
+   cd backend
+   uvicorn main:app --reload
    ```
 
-2. **Run the Frontend**:
+2. **Start the Frontend**:
    ```bash
+   cd ../frontend
    streamlit run app.py
    ```
 
-3. **Access the Application**:
-   - Backend API: [http://localhost:8000/docs](http://localhost:8000/docs) (Swagger UI)
-   - Frontend: [http://localhost:8501](http://localhost:8501)
+3. **Access the Chatbot**:
+   - Open your browser and navigate to the provided local URL for the frontend (e.g., `http://localhost:8501`).
+
+## Running with Docker
+
+1. **Build and Start Services**:
+   ```bash
+   docker-compose up --build
+   ```
+
+2. **Access the Chatbot**:
+   - Frontend: `http://localhost:8501`
+   - Backend: `http://localhost:8000`
 
 ## Usage
 
@@ -94,28 +143,12 @@ The project is structured into the following components:
 - Go to the **Chat with Bot** page.
 - Ask questions about your documents, and the AI will provide context-aware responses.
 
-## Project Structure
-
-```
-rag_chatbot_poc/
-├── backend/
-│   ├── auth/               # Authentication and user management
-│   ├── chat/               # Chatbot logic and schemas
-│   ├── config.py           # Application configuration
-│   ├── db/                 # MongoDB connection setup
-│   ├── logger.py           # Logging configuration
-│   ├── main.py             # FastAPI application entry point
-│   ├── vector_db/          # Qdrant integration and vector search
-├── app.py                  # Streamlit frontend
-├── pyproject.toml          # Project dependencies and configuration
-├── .env.example            # Example environment variables
-├── README.md               # Project documentation
-```
-
 ## Notes
 
 - Ensure MongoDB, Redis, and Qdrant are running before starting the application.
 - Logs are stored in the `logs/` directory and are automatically cleaned up after 4 days.
+- Ensure you have the required API keys for any external LLM services.
+- Configuration files may be present for customizing retrieval or model parameters.
 
 ## Future Enhancements
 
