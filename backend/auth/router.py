@@ -12,7 +12,9 @@ from backend.logger import logger
 router = APIRouter()
 
 
-@router.post("/users", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
+@router.post(
+    "/register", status_code=status.HTTP_201_CREATED, response_model=UserResponse
+)
 async def register_user(
     auth_data: AuthUser = Depends(valid_user_create),
 ) -> UserResponse:
@@ -29,7 +31,7 @@ async def register_user(
         )
 
 
-@router.post("/users/login", response_model=AccessTokenResponse)
+@router.post("/login", response_model=AccessTokenResponse)
 async def auth_user(
     auth_data: AuthUser,
     response: Response,

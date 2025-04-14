@@ -118,9 +118,6 @@ class QdrantUtils:
         file_content: bytes,
         metadata: dict,
     ):
-        print(f"File name: {filename}")
-        print(f"Metadata: {metadata}")
-
         # Open the PDF document from the byte stream
         doc = pymupdf.open(stream=file_content, filetype="pdf")
 
@@ -135,8 +132,8 @@ class QdrantUtils:
                 "excerpt_page_number": page["metadata"]["page"],  # type: ignore
                 "metadata": metadata,
             })
-        print(f"Documents: {documents}")
 
+        # Create points for Qdrant
         final_data = await self.create_point(documents)
 
         if not await self.qdrant_client.collection_exists(collection_name):

@@ -96,9 +96,9 @@ async def healthcheck() -> dict[str, str]:
 
 
 # Include routers
-app.include_router(auth_router, tags=["Auth"])
-app.include_router(chat_router, tags=["Chat"])
-app.include_router(vector_db_router, tags=["Vector DB"])
+app.include_router(auth_router, tags=["Auth"], prefix="/auth")
+app.include_router(chat_router, tags=["Chat"], prefix="/chatbot")
+app.include_router(vector_db_router, tags=["Vector DB"], prefix="/qdrant")
 
 if __name__ == "__main__":
     import uvicorn
