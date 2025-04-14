@@ -85,7 +85,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 # Health check endpoint
-@app.get("/healthcheck", include_in_schema=False)
+@app.get("/health", include_in_schema=False)
 async def healthcheck() -> dict[str, str]:
     logger.info("Healthcheck")
     return {
