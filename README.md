@@ -155,3 +155,6 @@ rag_chatbot_poc/
 - **Advanced Search Filters**: Add support for filtering by metadata.
 - **Multi-File Upload**: Enable uploading multiple documents at once.
 - **Improved AI Responses**: Enhance the chatbot's system prompts for better accuracy.
+
+# License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
