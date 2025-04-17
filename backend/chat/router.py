@@ -1,10 +1,9 @@
-from fastapi import APIRouter, Body, Depends, HTTPException, Request
-
 from auth import dependencies as auth_deps
 from auth.schemas import ValidateRefreshTokenResponse
 from chat.chat import Chat
 from chat.schemas import AllChatMessage, ChatMessageOut
 from db import get_db
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from logger import logger
 
 router = APIRouter()

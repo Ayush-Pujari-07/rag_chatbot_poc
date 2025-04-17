@@ -3,14 +3,13 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 import redis
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-from starlette.middleware.cors import CORSMiddleware
-
 from auth.router import router as auth_router
 from chat.router import router as chat_router
 from config import app_configs, settings
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from logger import logger
+from starlette.middleware.cors import CORSMiddleware
 from vector_db.router import router as vector_db_router
 
 logger.info("Starting application")

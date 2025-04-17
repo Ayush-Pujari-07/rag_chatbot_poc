@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
-from fastapi.responses import JSONResponse
-
 from auth.dependencies import valid_refresh_token
 from auth.schemas import ValidateRefreshTokenResponse
 from config import settings
+from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
+from fastapi.responses import JSONResponse
 from logger import logger
 from vector_db.qdrant import QdrantUtils
 from vector_db.schemas import DocumentTypes, UserId

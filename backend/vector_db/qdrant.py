@@ -5,13 +5,12 @@ from typing import Any
 
 import pymupdf
 import pymupdf4llm
+from config import settings
+from logger import logger
 from openai import AsyncOpenAI
 from qdrant_client import AsyncQdrantClient, models
 from scipy.sparse._matrix import spmatrix
 from sklearn.feature_extraction.text import TfidfVectorizer
-
-from config import settings
-from logger import logger
 from vector_db.schemas import Document, UserId
 
 

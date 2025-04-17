@@ -153,8 +153,19 @@ rag_chatbot_poc/
 ## Future Enhancements
 
 - **Advanced Search Filters**: Add support for filtering by metadata.
+- **User Roles and Permissions**: Implement role-based access control for document management.
+- **Document Versioning**: Track changes to documents over time.
+- **Chat History**: Store and display chat history for users.
+- **UI Improvements**: Enhance the Streamlit interface for better user experience.
+- **Error Handling**: Improve error handling and user feedback in the frontend.
+- **Testing**: Add unit tests and integration tests for backend and frontend components.
+- **CI/CD Pipeline**: Set up a continuous integration and deployment pipeline for automated testing and deployment.
 - **Multi-File Upload**: Enable uploading multiple documents at once.
 - **Improved AI Responses**: Enhance the chatbot's system prompts for better accuracy.
+- **Filtering and Sorting**: Implement filtering and sorting options for search results.
+- **Document Preprocessing**: Add support for different document formats (e.g., DOCX, TXT).
+- **Filter keys generation file uploading**: Implement a feature to generate filter keys for documents.
+- **Chatbot Performance Monitoring**: Introduce metrics to monitor the performance of the chatbot.
 
 # License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

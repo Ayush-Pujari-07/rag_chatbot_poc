@@ -1,11 +1,10 @@
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import Cookie
-
 from auth.exceptions import EmailTaken, RefreshTokenNotValid
 from auth.schemas import AuthUser, ValidateRefreshTokenResponse
 from auth.service import get_refresh_token, get_user_by_email
+from fastapi import Cookie
 
 
 async def valid_user_create(

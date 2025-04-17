@@ -4,12 +4,11 @@ from datetime import datetime, timezone
 from typing import List, Union
 
 from bson.objectid import ObjectId
+from chat.schemas import AllChatMessage, ChatMessage, ChatMessageOut, ChatRole
+from config import settings
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.messages.base import BaseMessage
 from langchain_openai.chat_models import ChatOpenAI
-
-from chat.schemas import AllChatMessage, ChatMessage, ChatMessageOut, ChatRole
-from config import settings
 from logger import logger
 from vector_db.qdrant import QdrantUtils
 

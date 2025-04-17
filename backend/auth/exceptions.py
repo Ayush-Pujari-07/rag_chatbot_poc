@@ -1,9 +1,8 @@
 from typing import Any
 
+from auth.constants import ErrorCode
 from fastapi import status
 from fastapi.exceptions import HTTPException
-
-from auth.constants import ErrorCode
 
 
 class DetailedHTTPException(HTTPException):
